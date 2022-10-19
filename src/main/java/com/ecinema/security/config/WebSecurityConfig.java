@@ -1,7 +1,6 @@
 package com.ecinema.security.config;
 
 import com.ecinema.filter.JwtAuthFilter;
-import com.ecinema.security.CustomAccessDeniedHandler;
 import com.ecinema.security.JwtAuthenticationEntryPoint;
 import com.ecinema.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
@@ -57,7 +55,6 @@ public class WebSecurityConfig {
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler)
                 .and()
                 .addFilterBefore(new JwtAuthFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();

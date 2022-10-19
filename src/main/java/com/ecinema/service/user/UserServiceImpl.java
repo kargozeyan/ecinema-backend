@@ -3,10 +3,13 @@ package com.ecinema.service.user;
 import com.ecinema.domain.Movie;
 import com.ecinema.domain.User;
 import com.ecinema.dto.req.EditRequestDto;
+import com.ecinema.exception.CustomException;
+import com.ecinema.exception.UserNotFoundException;
 import com.ecinema.repo.UserRepo;
 import com.ecinema.security.AppUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -43,14 +47,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepo.findByEmail(email);
+        Optional<User> user = userRepo.findByEmail(email);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        return user.get();
     }
 
     @Override
     public void editUser(EditRequestDto dto) {
         User currentUser = getCurrentUser();
-        if (passwordEncoder.matches(dto.getOldPassword(), currentUser.getPassword())) {
-            return;
+        if (!passwordEncoder.matches(dto.getOldPassword(), currentUser.getPassword())) {
+            throw new CustomException(HttpStatus.BAD_REQUEST, "Wrong password");
         }
 
         currentUser.setPassword(passwordEncoder.encode(dto.getNewPassword()));

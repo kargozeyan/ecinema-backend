@@ -1,7 +1,6 @@
 package com.ecinema.controller;
 
 import com.ecinema.domain.Movie;
-import com.ecinema.domain.User;
 import com.ecinema.dto.req.EditRequestDto;
 import com.ecinema.dto.res.BalanceDto;
 import com.ecinema.service.user.UserService;
@@ -9,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -19,12 +17,12 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public User getCurrentUser() {
-        return userService.getCurrentUser();
+    public ResponseEntity<?> getCurrentUser() {
+        return ResponseEntity.ok(userService.getCurrentUser());
     }
 
     @PutMapping
-    public void editUser(@Valid @RequestBody EditRequestDto editRequestDto) {
+    public void editUser(@RequestBody EditRequestDto editRequestDto) {
         userService.editUser(editRequestDto);
     }
 

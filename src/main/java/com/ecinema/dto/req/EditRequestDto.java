@@ -23,10 +23,10 @@ public class EditRequestDto {
     private final String email;
 
     @NotEmpty
-    @Size(min = 8, message = "Password must have at least 8 charactes")
+    @Size(min = 8, message = "Password must have at least 8 characters")
     private final String oldPassword;
 
     @NotEmpty
-    @Size(min = 8, message = "Password must have at least 8 charactes")
+    @Size(min = 8, message = "Password must have at least 8 characters")
     private final String newPassword;
 }

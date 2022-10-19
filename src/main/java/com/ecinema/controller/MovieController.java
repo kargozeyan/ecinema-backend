@@ -1,14 +1,11 @@
 package com.ecinema.controller;
 
-import com.ecinema.dto.res.MoviesByGenreDto;
 import com.ecinema.service.movie.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/movies")

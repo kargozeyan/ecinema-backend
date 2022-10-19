@@ -5,12 +5,15 @@ import com.ecinema.domain.User;
 import com.ecinema.dto.req.LoginDto;
 import com.ecinema.dto.req.RegisterDto;
 import com.ecinema.dto.res.AuthResponseDto;
+import com.ecinema.exception.CustomException;
+import com.ecinema.exception.UserNotFoundException;
 import com.ecinema.repo.RoleRepo;
 import com.ecinema.repo.UserRepo;
 import com.ecinema.security.AppUser;
 import com.ecinema.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -41,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto register(RegisterDto registerDto, String issuer) throws Exception {
         if (userRepo.existsByEmail(registerDto.getEmail())) {
-            throw new Exception("Already exists");
+            throw new CustomException(HttpStatus.CONFLICT, "User with such email already exists");
         }
 
         User user = registerDto.toUser(passwordEncoder);
@@ -57,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String accessToken = jwtTokenProvider.generateAccessToken(authentication, issuer);
         String refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
-        User user = userRepo.findByEmail(email);
+        User user = userRepo.findByEmail(email).orElseThrow(UserNotFoundException::new);
         return new AuthResponseDto(accessToken, refreshToken,
                 new AuthResponseDto.User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getBalance()));
 
@@ -67,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponseDto refreshAccessToken(String refreshToken, String issuer) {
         DecodedJWT decodedJWT = jwtTokenProvider.verifyAndDecode(refreshToken);
         String email = decodedJWT.getSubject();
-        User currentUser = userRepo.findByEmail(email);
+        User currentUser = userRepo.findByEmail(email).orElseThrow(UserNotFoundException::new);
         UserDetails userDetails = AppUser.from(currentUser);
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
